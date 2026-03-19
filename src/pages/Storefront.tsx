@@ -1,16 +1,23 @@
 import BuyerLayout from "@/components/BuyerLayout";
 import ProductCard from "@/components/ProductCard";
+import RevealOnScroll from "@/components/RevealOnScroll";
 import { useRealTimeProducts } from "@/hooks/useRealTimeProducts";
 import type { Product } from "@/data/types";
 
 const Section = ({ title, items }: { title: string; items: Product[] }) => (
   items.length > 0 ? (
-    <div>
-      <h2 className="font-display text-xl font-bold">{title}</h2>
-      <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map(p => <ProductCard key={p.id} product={p} />)}
+    <RevealOnScroll>
+      <h2 className="font-display text-xl font-bold mb-4">{title}</h2>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map((p, index) => (
+          <RevealOnScroll key={p.id} delay={index * 100}>
+            <div className="transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg rounded-lg h-full">
+              <ProductCard product={p} />
+            </div>
+          </RevealOnScroll>
+        ))}
       </div>
-    </div>
+    </RevealOnScroll>
   ) : null
 );
 
@@ -23,10 +30,10 @@ const Storefront = () => {
   return (
     <BuyerLayout>
       <div className="container space-y-12 py-12">
-        <div>
+        <RevealOnScroll className="mb-8">
           <h1 className="font-display text-3xl font-bold">Storefront</h1>
           <p className="mt-1 text-muted-foreground">Discover our curated collections {loading && "(loading...)"}</p>
-        </div>
+        </RevealOnScroll>
         <Section title="🆕 New Arrivals" items={newProducts} />
         <Section title="🔥 Trending Now" items={trending} />
         <Section title="⭐ Best Sellers" items={bestsellers} />

@@ -43,7 +43,7 @@ const BuyerNavbar = () => {
 
         {/* Right side actions: Cart, Logout, then Profile Details */}
         <div className="flex items-center gap-4">
-          <Link to="/cart" className="relative p-2 text-foreground/70 transition-colors hover:text-foreground">
+          <Link to="/cart" className="hidden md:flex relative p-2 text-foreground/70 transition-colors hover:text-foreground">
             <ShoppingCart className="h-5 w-5" />
             {itemCount > 0 && (
               <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#f15a2b] text-[10px] font-bold text-white shadow-sm">
