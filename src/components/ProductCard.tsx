@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import type { Product } from "@/data/types";
 import { useCart } from "@/contexts/CartContext";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Image as ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ const tagColors: Record<string, string> = {
 const ProductCard = ({ product }: { product: Product }) => {
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const [imageError, setImageError] = useState(false);
 
   const handleBuyNow = () => {
     if (product.stock === 0) {
@@ -29,13 +31,21 @@ const ProductCard = ({ product }: { product: Product }) => {
   return (
     <div className="group relative overflow-hidden rounded-lg border bg-card transition-shadow hover:shadow-md">
       <Link to={`/products/${product.id}`} className="block">
-        <div className="aspect-square overflow-hidden">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
-            loading="lazy"
-          />
+        <div className="aspect-square overflow-hidden bg-muted flex items-center justify-center">
+          {imageError ? (
+            <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+              <ImageIcon className="h-8 w-8" />
+              <span className="text-xs">Image unavailable</span>
+            </div>
+          ) : (
+            <img
+              src={product.image}
+              alt={product.name}
+              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+              loading="lazy"
+              onError={() => setImageError(true)}
+            />
+          )}
         </div>
       </Link>
       {product.tag && (

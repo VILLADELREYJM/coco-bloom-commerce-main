@@ -3,7 +3,7 @@ import { useState } from "react";
 import BuyerLayout from "@/components/BuyerLayout";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, ArrowLeft, Minus, Plus } from "lucide-react";
+import { ShoppingCart, ArrowLeft, Minus, Plus, Image as ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useRealTimeProducts } from "@/hooks/useRealTimeProducts";
@@ -15,6 +15,7 @@ const ProductDetail = () => {
   const product = products.find(p => p.id === id);
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const [imageError, setImageError] = useState(false);
 
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= (product?.stock || 0)) {
@@ -66,8 +67,20 @@ const ProductDetail = () => {
           <ArrowLeft className="h-4 w-4" /> Back to Products
         </Link>
         <div className="grid gap-8 md:grid-cols-2">
-          <div className="overflow-hidden rounded-lg border">
-            <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+          <div className="overflow-hidden rounded-lg border bg-muted flex items-center justify-center min-h-96">
+            {imageError ? (
+              <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                <ImageIcon className="h-12 w-12" />
+                <span className="text-sm">Image unavailable</span>
+              </div>
+            ) : (
+              <img
+                src={product.image}
+                alt={product.name}
+                className="h-full w-full object-cover"
+                onError={() => setImageError(true)}
+              />
+            )}
           </div>
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-2">
