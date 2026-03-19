@@ -4,7 +4,6 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/logo.png";
 
 const BuyerNavbar = () => {
   const { itemCount } = useCart();
@@ -17,7 +16,7 @@ const BuyerNavbar = () => {
 
         <Link to="/" className="flex items-center gap-2">
           <img
-            src={logo}
+            src="/images/logo.png"
             alt="EcoCoin Logo"
             className="h-10 w-10 object-contain"
           />

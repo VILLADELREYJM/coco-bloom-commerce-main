@@ -3,7 +3,6 @@ import BuyerLayout from "@/components/BuyerLayout";
 import ProductCard from "@/components/ProductCard";
 import { ArrowRight, Leaf, Truck, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-coir.jpg";
 import { useRealTimeProducts } from "@/hooks/useRealTimeProducts";
 
 const Index = () => {
@@ -15,7 +14,7 @@ const Index = () => {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src={heroImage} alt="Coconut coir fibers" className="h-full w-full object-cover" />
+          <img src="/images/hero-coir.jpg" alt="Coconut coir fibers" className="h-full w-full object-cover" />
           <div className="absolute inset-0 bg-foreground/60" />
         </div>
         <div className="container relative z-10 py-24 md:py-36">
