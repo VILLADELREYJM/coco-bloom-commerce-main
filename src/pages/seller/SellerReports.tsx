@@ -120,6 +120,24 @@ const SellerReports = () => {
                   <div className="flex-1">
                     <p className="text-sm font-medium">Order #{tx.id.slice(0, 8).toUpperCase()}</p>
                     <p className="text-xs text-muted-foreground">{new Date(tx.date).toLocaleString("en-PH")}</p>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      {tx.items.slice(0, 6).map((item) => (
+                        <img
+                          key={item.product.id}
+                          src={(item.product.image as any) || "/placeholder.svg"}
+                          alt={item.product.name}
+                          className="h-9 w-9 rounded object-cover border"
+                          onError={(e) => {
+                            e.currentTarget.src = "/placeholder.svg";
+                          }}
+                        />
+                      ))}
+                      {tx.items.length > 6 && (
+                        <span className="text-xs text-muted-foreground">+{tx.items.length - 6} more</span>
+                      )}
+                    </div>
+
                     <div className="mt-2 flex flex-wrap gap-2">
                       {tx.items.map(item => (
                         <span key={item.product.id} className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium">

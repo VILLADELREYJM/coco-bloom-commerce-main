@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Package } from "lucide-react";
+import { normalizeImageSrc } from "@/lib/image";
 
 const Transactions = () => {
   const { user, transactions } = useAuth();
@@ -50,7 +51,14 @@ const Transactions = () => {
                 <div className="mt-4 space-y-2">
                   {tx.items.map(item => (
                     <div key={item.product.id} className="flex items-center gap-3 text-sm">
-                      <img src={item.product.image} alt={item.product.name} className="h-10 w-10 rounded object-cover" />
+                      <img
+                        src={normalizeImageSrc(item.product.image) || "/placeholder.svg"}
+                        alt={item.product.name}
+                        className="h-10 w-10 rounded object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/placeholder.svg";
+                        }}
+                      />
                       <span className="flex-1">{item.product.name}</span>
                       <span className="text-muted-foreground">x{item.quantity}</span>
                       <span className="font-medium">₱{(item.product.price * item.quantity).toLocaleString()}</span>
