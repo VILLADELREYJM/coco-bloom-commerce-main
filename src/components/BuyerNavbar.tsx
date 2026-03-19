@@ -75,9 +75,18 @@ const BuyerNavbar = () => {
               </Link>
             </div>
           ) : (
-            <Link to="/login">
-              <Button variant="default" size="sm" className="bg-[#4a6b4a] hover:bg-[#3d5a3d]">Login</Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to="/login">
+                <Button variant="ghost" size="sm" className="hover:bg-[#4a6b4a]/10 hover:text-[#4a6b4a]">
+                  Login
+                </Button>
+              </Link>
+              <Link to="/register">
+                <Button variant="default" size="sm" className="bg-[#4a6b4a] hover:bg-[#3d5a3d]">
+                  Register
+                </Button>
+              </Link>
+            </div>
           )}
 
           <button className="p-2 md:hidden" onClick={() => setOpen(!open)}>
