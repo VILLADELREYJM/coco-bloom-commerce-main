@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 34 54% 97%;
+    --foreground: 17 9% 16%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 17 9% 16%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 17 9% 16%;
+
+    --primary: 106 29% 37%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 29 53% 36%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 34 30% 93%;
+    --muted-foreground: 17 9% 40%;
+
+    --accent: 30 53% 64%;
+    --accent-foreground: 17 9% 16%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 34 20% 88%;
+    --input: 34 20% 88%;
+    --ring: 106 29% 37%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 17 9% 16%;
+    --sidebar-foreground: 34 54% 97%;
+    --sidebar-primary: 106 29% 37%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 17 9% 22%;
+    --sidebar-accent-foreground: 34 54% 97%;
+    --sidebar-border: 17 9% 25%;
+    --sidebar-ring: 106 29% 37%;
+
+    --footer-background: 17 9% 16%;
+    --footer-foreground: 34 30% 80%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
