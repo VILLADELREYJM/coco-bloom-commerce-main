@@ -26,6 +26,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (data: Omit<User, "id" | "role"> & { password: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  updateUserProfile: (data: Partial<User>) => Promise<{ success: boolean; error?: string }>;
   addTransaction: (items: CartItem[], paymentMethod: string, deliveryMethod: string) => Promise<void>;
 }
 
@@ -71,6 +72,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    const safetyTimeout = setTimeout(() => {
+      setLoading(false);
+    }, 6000);
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         // Fetch user data from firestore
@@ -90,7 +95,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(safetyTimeout);
+      unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -136,6 +144,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUserProfile = async (data: Partial<User>) => {
+    if (!user) return { success: false, error: "No user logged in" };
+    try {
+      const userRef = doc(db, "users", user.id);
+      await updateDoc(userRef, data);
+      setUser(prev => prev ? { ...prev, ...data } : null);
+      return { success: true };
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      return { success: false, error: getFirebaseErrorMessage(error) };
+    }
+  };
+
   const addTransaction = async (items: CartItem[], paymentMethod: string, deliveryMethod: string) => {
     if (!user) return;
 
@@ -148,7 +169,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         total,
         paymentMethod,
         deliveryMethod,
-        status: "completed",
+        status: "pending",
+        statusHistory: [{ status: "pending", at: new Date().toISOString() }],
         createdAt: serverTimestamp()
       };
 
@@ -186,8 +208,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, transactions, login, register, logout, addTransaction }}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, transactions, login, register, logout, addTransaction, updateUserProfile }}>
+      {loading ? (
+        <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+          <div className="text-sm text-muted-foreground">Loading please wait...</div>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }

@@ -5,11 +5,20 @@ import type { Product } from "@/data/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Image as ImageIcon } from "lucide-react";
+import { ProductUpdatedToast } from "@/components/ProductUpdatedToast";
+import { Image as ImageIcon, Star } from "lucide-react";
 
 const tagOptions: (Product["tag"] | undefined)[] = [undefined, "new", "trending", "bestseller"];
 
-const defaultImageById = new Map(defaultProducts.map((product) => [product.id, product.image]));
+const defaultImageById = new Map(defaultProducts.map((product) => [String(product.id), product.image]));
+
+const getDefaultImage = (product: Product) => {
+  return (
+    defaultImageById.get(String(product.id)) ||
+    defaultProducts.find((item) => item.name === product.name)?.image ||
+    "/placeholder.svg"
+  );
+};
 
 const normalizeProductImage = (image: string) => {
   const value = (image || "").trim();
@@ -32,7 +41,7 @@ const normalizeProductImage = (image: string) => {
 const resolveProductImage = (product: Product) => {
   const normalized = normalizeProductImage(product.image);
   if (normalized.startsWith("blob:")) {
-    return defaultImageById.get(product.id) || "/placeholder.svg";
+    return getDefaultImage(product);
   }
   return normalized;
 };
@@ -62,7 +71,7 @@ const ProductStorefrontRow = ({
                 className="h-full w-full object-cover"
                 onError={(e) => {
                   const img = e.currentTarget;
-                  const defaultImage = defaultImageById.get(product.id);
+                  const defaultImage = getDefaultImage(product);
 
                   if (img.dataset.fallbackTried !== "1" && defaultImage && img.src !== new URL(defaultImage, window.location.origin).href) {
                     img.dataset.fallbackTried = "1";
@@ -126,7 +135,7 @@ const SellerStorefront = () => {
     const updated = items.map(p => p.id === id ? { ...p, featured: !p.featured } : p);
     setItems(updated);
     localStorage.setItem("coircraft_seller_products", JSON.stringify(updated));
-    toast.success("Storefront updated");
+    toast.custom(() => <ProductUpdatedToast type="update" />, { duration: 1500 });
   };
 
   const cycleTag = (id: string) => {
@@ -147,22 +156,76 @@ const SellerStorefront = () => {
           <h1 className="font-display text-2xl font-bold">Manage Storefront</h1>
           <p className="mt-1 text-sm text-muted-foreground">Toggle featured products and set product tags</p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            if (confirm("Reset to default products? This will clear custom changes.")) {
-              localStorage.removeItem("coircraft_seller_products");
-              setItems(defaultProducts);
-              toast.success("Reset to default products");
-            }
-          }}
-        >
-          Reset Data
-        </Button>
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-card">
+      {/* Mobile Grid */}
+      <div className="grid grid-cols-2 gap-3 md:hidden pb-20">
+        {items.map((p) => (
+          <div key={p.id} className="relative bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full active:scale-[0.98] transition-all">
+            <div className="relative aspect-square w-full bg-slate-100">
+              <img
+                src={resolveProductImage(p)}
+                alt={p.name}
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  const defaultImage = getDefaultImage(p);
+
+                  if (
+                    target.dataset.fallbackTried !== "1" &&
+                    defaultImage &&
+                    target.src !== new URL(defaultImage, window.location.origin).href
+                  ) {
+                    target.dataset.fallbackTried = "1";
+                    target.src = defaultImage;
+                    return;
+                  }
+
+                  if (target.dataset.placeholderTried !== "1") {
+                    target.dataset.placeholderTried = "1";
+                    target.src = "/placeholder.svg";
+                  }
+                }}
+              />
+              <button
+                onClick={() => toggleFeatured(p.id)}
+                className={`absolute top-2 right-2 p-1.5 rounded-full shadow-sm backdrop-blur-sm z-10 transition-colors border ${p.featured ? 'bg-yellow-100 border-yellow-200 text-yellow-600' : 'bg-white/90 border-slate-200 text-slate-400'}`}
+              >
+                <Star className={`h-4 w-4 ${p.featured ? "fill-current" : ""}`} />
+              </button>
+            </div>
+
+            <div className="p-3 flex flex-col flex-1">
+              <div className="flex justify-between items-start gap-2 mb-1">
+                <h3 className="font-semibold text-xs text-slate-900 leading-tight line-clamp-2 min-h-[2rem]">
+                  {p.name}
+                </h3>
+              </div>
+
+              <div className="mt-auto pt-2 border-t border-slate-100 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold">Price</span>
+                  <span className="font-bold text-[#4a6b4a] text-sm">₱{p.price.toLocaleString()}</span>
+                </div>
+
+                <button
+                  onClick={() => cycleTag(p.id)}
+                  className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md border text-[10px] font-bold uppercase tracking-wider transition-colors ${p.tag ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-white border-dashed border-slate-300 text-slate-400'}`}
+                >
+                  Tag: {p.tag ? <span className="text-[#4a6b4a] underline decoration-wavy underline-offset-2">{p.tag}</span> : "None"}
+                </button>
+              </div>
+            </div>
+            {p.featured && (
+              <div className="absolute top-2 left-2 bg-yellow-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm z-10">
+                FEATURED
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="hidden md:block overflow-hidden rounded-lg border bg-card">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b bg-muted/50">

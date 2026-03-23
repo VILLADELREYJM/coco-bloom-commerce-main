@@ -8,7 +8,7 @@ const Section = ({ title, items }: { title: string; items: Product[] }) => (
   items.length > 0 ? (
     <RevealOnScroll>
       <h2 className="font-display text-xl font-bold mb-4">{title}</h2>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
         {items.map((p, index) => (
           <RevealOnScroll key={p.id} delay={index * 100}>
             <div className="transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg rounded-lg h-full">

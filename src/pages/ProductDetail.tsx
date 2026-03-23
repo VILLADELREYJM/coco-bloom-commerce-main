@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useRealTimeProducts } from "@/hooks/useRealTimeProducts";
 import { AddedToCartToast } from "@/components/AddedToCartToast";
 import ProductCard from "@/components/ProductCard";
+import { ProductReviews } from "@/components/ProductReviews";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -28,6 +29,9 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [imageError, setImageError] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const ratingAverage = product?.ratingAverage ?? 0;
+  const ratingCount = product?.ratingCount ?? 0;
+  const roundedRating = Math.round(ratingAverage);
 
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= (product?.stock || 0)) {
@@ -60,9 +64,10 @@ const ProductDetail = () => {
       return;
     }
     if (product) {
-      addToCart(product);
       toast.success("Proceeding to checkout...");
-      navigate("/checkout");
+      navigate("/checkout", {
+        state: { checkoutItems: [{ product, quantity }] },
+      });
     }
   };
 
@@ -113,13 +118,23 @@ const ProductDetail = () => {
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <span className="font-medium uppercase tracking-wider">{product.category}</span>
                 <span>•</span>
-                <div className="flex items-center text-yellow-500">
-                  <Star className="h-4 w-4 fill-current" />
-                  <Star className="h-4 w-4 fill-current" />
-                  <Star className="h-4 w-4 fill-current" />
-                  <Star className="h-4 w-4 fill-current" />
-                  <Star className="h-4 w-4 fill-current text-gray-300" />
-                  <span className="ml-1 text-xs text-muted-foreground">(4.0)</span>
+                <div className="flex items-center gap-1 transition-colors duration-300">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <Star
+                      key={value}
+                      className={`h-4 w-4 ${ratingCount > 0 && value <= roundedRating
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-muted-foreground/50"
+                        }`}
+                    />
+                  ))}
+                  {ratingCount > 0 ? (
+                    <span className="ml-1 text-xs text-muted-foreground">
+                      ({ratingAverage.toFixed(1)} • {ratingCount})
+                    </span>
+                  ) : (
+                    <span className="ml-1 text-xs text-muted-foreground">(No ratings yet)</span>
+                  )}
                 </div>
               </div>
               <h1 className="font-display text-3xl md:text-5xl font-bold tracking-tight text-foreground leading-tight">
@@ -211,11 +226,16 @@ const ProductDetail = () => {
           </div>
         </div>
 
+        {/* Reviews Section */}
+        <div className="mt-16 border-t pt-12">
+          <ProductReviews productId={product.id} />
+        </div>
+
         {/* Similar Products Section */}
         {similarProducts.length > 0 && (
           <div className="mt-20 border-t pt-12">
             <h2 className="font-display text-2xl font-bold mb-8">Similar Products You May Like</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
               {similarProducts.map((p) => (
                 <div key={p.id} className="h-full">
                   <ProductCard product={p} />

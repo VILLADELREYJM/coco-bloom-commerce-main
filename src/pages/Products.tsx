@@ -62,14 +62,14 @@ const Products = () => {
 
             {/* Categories (Pills) */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 overflow-x-auto pb-2 xl:pb-0 scrollbar-hide mask-fade-right">
+              <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:overflow-x-auto sm:pb-2 xl:pb-0 sm:scrollbar-hide sm:mask-fade-right">
                 {categories.map(c => (
                   <button
                     key={c}
                     onClick={() => setCategory(c)}
-                    className={`px-5 py-2.5 text-sm font-medium rounded-full transition-all whitespace-nowrap active:scale-95 ${category === c
-                        ? "bg-[#4a6b4a] text-white shadow-md shadow-green-900/10 ring-2 ring-green-600/20"
-                        : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/50"
+                    className={`px-3 py-2 text-sm sm:px-5 sm:py-2.5 font-medium rounded-lg sm:rounded-full transition-all whitespace-nowrap active:scale-95 ${category === c
+                      ? "bg-[#4a6b4a] text-white shadow-md shadow-green-900/10 ring-2 ring-green-600/20"
+                      : "bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/50"
                       }`}
                   >
                     {c}
@@ -79,9 +79,9 @@ const Products = () => {
             </div>
 
             {/* Sorting (Segmented Control) */}
-            <div className="flex items-center justify-between xl:justify-end gap-4 border-t xl:border-t-0 border-slate-100 pt-4 xl:pt-0">
+            <div className="flex items-center justify-between xl:justify-end gap-4 border-t xl:border-t-0 border-slate-100 pt-4 xl:pt-0 w-full xl:w-auto">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:block">Sort By</span>
-              <div className="flex items-center bg-slate-100/80 p-1.5 rounded-lg border border-slate-200/50">
+              <div className="grid grid-cols-2 w-full sm:w-auto sm:flex sm:items-center bg-slate-100/80 p-1.5 rounded-lg border border-slate-200/50 gap-2 sm:gap-1">
                 {[
                   { id: "popular", label: "Popular" },
                   { id: "latest", label: "Latest" },
@@ -90,9 +90,9 @@ const Products = () => {
                   <button
                     key={item.id}
                     onClick={() => setSort(item.id)}
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all active:scale-95 ${sort === item.id
-                        ? "bg-white text-[#4a6b4a] shadow-sm ring-1 ring-slate-200"
-                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                    className={`w-full sm:w-auto px-4 py-2 text-sm font-medium rounded-md transition-all active:scale-95 ${sort === item.id
+                      ? "bg-white text-[#4a6b4a] shadow-sm ring-1 ring-slate-200"
+                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
                       }`}
                   >
                     {item.label}
@@ -100,12 +100,12 @@ const Products = () => {
                 ))}
 
                 {/* Price Dropdown */}
-                <div className="pl-1 ml-1 border-l border-slate-200">
+                <div className="w-full sm:w-auto sm:pl-1 sm:ml-1 sm:border-l border-slate-200">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all outline-none active:scale-95 ${sort.startsWith('price')
-                          ? "bg-white text-[#4a6b4a] shadow-sm ring-1 ring-slate-200"
-                          : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
+                      <button className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all outline-none active:scale-95 ${sort.startsWith('price')
+                        ? "bg-white text-[#4a6b4a] shadow-sm ring-1 ring-slate-200"
+                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50"
                         }`}>
                         Price <ChevronDown className="h-3.5 w-3.5 opacity-70" />
                       </button>
@@ -132,7 +132,7 @@ const Products = () => {
         </RevealOnScroll>
 
         {/* Product Grid */}
-        <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-10 lg:grid-cols-4">
           {filtered.map((p, index) => (
             <RevealOnScroll key={p.id} delay={index * 50}>
               <div className="transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg rounded-lg h-full">

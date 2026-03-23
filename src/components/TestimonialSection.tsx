@@ -64,32 +64,32 @@ const TestimonialSection = () => {
                     </h2>
                 </div>
 
-                <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3 sm:gap-8 lg:grid-cols-3">
                     {testimonials.map((testimonial, index) => (
                         <div
                             key={index}
-                            className="group relative flex flex-col justify-between rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 hover:shadow-md transition-shadow"
+                            className="group relative flex flex-col justify-between rounded-2xl bg-white p-4 sm:p-6 shadow-sm ring-1 ring-slate-100 hover:shadow-md transition-shadow"
                         >
                             <div>
-                                <div className="flex gap-0.5 mb-4">
+                                <div className="flex gap-0.5 mb-2 sm:mb-4">
                                     {[...Array(testimonial.rating)].map((_, i) => (
-                                        <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                                        <Star key={i} className="h-3 w-3 sm:h-4 sm:w-4 fill-amber-400 text-amber-400" />
                                     ))}
                                 </div>
-                                <blockquote className="text-slate-700 leading-relaxed mb-6">
+                                <blockquote className="text-slate-700 leading-relaxed mb-4 sm:mb-6 text-xs sm:text-base">
                                     "{testimonial.quote}"
                                 </blockquote>
                             </div>
 
-                            <div className="flex items-center gap-3">
-                                <div className={`flex h-10 w-10 items-center justify-center rounded-full text-white font-bold ${testimonial.color}`}>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className={`flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full text-white font-bold text-xs sm:text-base ${testimonial.color}`}>
                                     {testimonial.initial}
                                 </div>
                                 <div className="flex flex-col text-left">
-                                    <span className="font-semibold text-slate-900 text-sm">
+                                    <span className="font-semibold text-slate-900 text-xs sm:text-sm">
                                         {testimonial.name}
                                     </span>
-                                    <span className="text-xs text-slate-500">
+                                    <span className="text-[10px] sm:text-xs text-slate-500">
                                         {testimonial.location}
                                     </span>
                                 </div>

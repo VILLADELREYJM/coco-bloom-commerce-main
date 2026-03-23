@@ -1,14 +1,29 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, Transaction as FirebaseTransaction } from "firebase/firestore";
+import { collection, query, onSnapshot } from "firebase/firestore";
 import type { Transaction } from "@/data/types";
 import { normalizeImageSrc } from "@/lib/image";
+
+const TRANSACTIONS_CACHE_KEY = "seller_transactions_cache_v1";
 
 export function useRealTimeTransactions() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        try {
+            const cached = localStorage.getItem(TRANSACTIONS_CACHE_KEY);
+            if (cached) {
+                const parsed = JSON.parse(cached) as Transaction[];
+                if (Array.isArray(parsed)) {
+                    setTransactions(parsed);
+                    setLoading(false);
+                }
+            }
+        } catch {
+            // Ignore cache parse errors and continue with live snapshot
+        }
+
         // Listen to all transactions in real-time
         const q = query(collection(db, "transactions"));
 
@@ -17,7 +32,10 @@ export function useRealTimeTransactions() {
             (snapshot) => {
                 const txs = snapshot.docs.map((docSnap) => {
                     const data = docSnap.data() as Omit<Transaction, "id">;
-                    const items = (data.items || []).map((item) => ({
+                    // Ensure items is an array before mapping
+                    const rawItems = Array.isArray(data.items) ? data.items : [];
+
+                    const items = rawItems.map((item) => ({
                         ...item,
                         product: {
                             ...item.product,
@@ -29,15 +47,22 @@ export function useRealTimeTransactions() {
                         id: docSnap.id,
                         ...data,
                         items,
-                    } as Transaction;
+                    };
                 });
 
                 // Sort by date descending (newest first)
-                setTransactions(txs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+                const sortedTxs = txs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                setTransactions(sortedTxs);
+                try {
+                    localStorage.setItem(TRANSACTIONS_CACHE_KEY, JSON.stringify(sortedTxs));
+                } catch {
+                    // Ignore write errors (private mode / storage limits)
+                }
                 setLoading(false);
             },
             (error) => {
                 console.error("Error fetching transactions:", error);
+                // Keep cached transactions as fallback when live Firestore read fails
                 setLoading(false);
             }
         );

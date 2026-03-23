@@ -1,14 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import BuyerLayout from "@/components/BuyerLayout";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Cart = () => {
-  const { items, removeFromCart, updateQuantity, total } = useCart();
+  const { items, removeFromCart, updateQuantity } = useCart();
+  const navigate = useNavigate();
 
   const [selected, setSelected] = useState<string[]>(items.map(i => i.product.id));
+
+  useEffect(() => {
+    setSelected((prev) => prev.filter((id) => items.some((item) => item.product.id === id)));
+  }, [items]);
 
   const toggleItem = (id: string) => {
     setSelected(prev =>
@@ -19,6 +24,13 @@ const Cart = () => {
   const selectedTotal = items
     .filter(i => selected.includes(i.product.id))
     .reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+
+  const selectedItems = items.filter((item) => selected.includes(item.product.id));
+
+  const handleProceedToCheckout = () => {
+    if (selectedItems.length === 0) return;
+    navigate("/checkout", { state: { checkoutItems: selectedItems } });
+  };
 
   if (items.length === 0) {
     return (
@@ -138,11 +150,18 @@ const Cart = () => {
 
             </div>
 
-            <Link to="/checkout">
-              <Button className="mt-6 w-full font-display font-semibold">
-                Proceed to Checkout
-              </Button>
-            </Link>
+            <Button
+              className="mt-6 w-full font-display font-semibold"
+              onClick={handleProceedToCheckout}
+              disabled={selectedItems.length === 0}
+            >
+              Proceed to Checkout
+            </Button>
+            {selectedItems.length === 0 && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Select at least one item to continue.
+              </p>
+            )}
 
           </div>
 

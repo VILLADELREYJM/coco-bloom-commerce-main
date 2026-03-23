@@ -16,27 +16,27 @@ const Index = () => {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 animate-in fade-in duration-1000">
-          <img src="/images/hero-coir.jpg" alt="Coconut coir fibers" className="h-full w-full object-cover scale-105 transition-transform duration-[20s] hover:scale-110" />
+          <img src="/images/hero-coir.jpg" alt="Coconut coir fibers" className="h-full w-full object-cover scale-105 transition-transform [transition-duration:20s] hover:scale-110" />
           <div className="absolute inset-0 bg-foreground/60" />
         </div>
         <div className="container relative z-10 py-24 md:py-36">
           <div className="max-w-2xl animate-in slide-in-from-bottom-8 duration-700 ease-out">
-            <h1 className="font-display text-4xl font-extrabold leading-tight text-card md:text-5xl lg:text-6xl">
+            <h1 className="font-display text-3xl font-extrabold leading-tight text-card sm:text-4xl md:text-5xl lg:text-6xl">
               Sustainable Coir Products from the Philippines
             </h1>
-            <p className="mt-4 text-lg text-card/80 animate-in slide-in-from-bottom-4 duration-700 delay-200 fill-mode-backwards">
+            <p className="mt-4 text-base text-card/80 animate-in slide-in-from-bottom-4 duration-700 delay-200 fill-mode-backwards sm:text-lg">
               Eco-friendly coconut fiber products for gardening, construction, and everyday use. Naturally strong, biodegradable, and locally sourced.
             </p>
-            <div className="mt-8 flex gap-3 animate-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-backwards">
+            <div className="mt-8 flex flex-col gap-3 animate-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-backwards sm:flex-row">
               <Link to="/products">
-                <Button size="lg" className="font-display font-semibold transition-transform active:scale-95 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                <Button size="lg" className="w-full font-display font-semibold transition-transform active:scale-95 shadow-lg hover:shadow-xl hover:-translate-y-0.5 sm:w-auto">
                   Shop Now <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/storefront">
                 <Button
                   size="lg"
-                  className="bg-black text-white font-display font-semibold hover:bg-white hover:text-black border border-black transition-all active:scale-95 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                  className="w-full bg-black text-white font-display font-semibold hover:bg-white hover:text-black border border-black transition-all active:scale-95 shadow-lg hover:shadow-xl hover:-translate-y-0.5 sm:w-auto"
                 >
                   Browse Storefront
                 </Button>
@@ -79,7 +79,7 @@ const Index = () => {
           </Link>
         </RevealOnScroll>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
           {featured.map((p, index) => (
             <RevealOnScroll key={p.id} delay={index * 100}>
               <div className="transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg rounded-lg h-full">

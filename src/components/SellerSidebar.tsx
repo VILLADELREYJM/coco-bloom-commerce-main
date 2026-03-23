@@ -1,18 +1,20 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, ShoppingBag, Package, BarChart3, LogOut } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, Package, BarChart3, LogOut, Users, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
+  { to: "/seller/reports", label: "Reports", icon: BarChart3 },
+  { to: "/seller/orders", label: "Orders", icon: ClipboardList },
+  { to: "/seller/users", label: "Users", icon: Users },
   { to: "/seller/storefront", label: "Storefront", icon: ShoppingBag },
   { to: "/seller/inventory", label: "Inventory", icon: Package },
-  { to: "/seller/reports", label: "Reports", icon: BarChart3 },
 ];
 
 const SellerSidebar = () => {
   const { pathname } = useLocation();
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-60 flex-col bg-sidebar text-sidebar-foreground">
+    <aside className="fixed left-0 top-0 z-40 hidden md:flex h-screen w-60 flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-5">
         <LayoutDashboard className="h-5 w-5 text-sidebar-primary" />
         <span className="font-display text-lg font-bold">Seller Panel</span>
