@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, type Firestore } from "firebase/firestore";
 import type { Product } from "@/data/types";
 import { normalizeImageSrc } from "@/lib/image";
 
-export function useRealTimeProducts() {
+export function useRealTimeProducts(firestore: Firestore = db) {
     const [rawProducts, setRawProducts] = useState<Product[]>([]);
     const [ratingsByProduct, setRatingsByProduct] = useState<
         Record<string, { average: number; count: number }>
@@ -13,7 +13,7 @@ export function useRealTimeProducts() {
 
     useEffect(() => {
         // Listen to all products in real-time
-        const q = query(collection(db, "products"));
+        const q = query(collection(firestore, "products"));
 
         const unsubscribe = onSnapshot(
             q,
@@ -37,10 +37,10 @@ export function useRealTimeProducts() {
         );
 
         return () => unsubscribe();
-    }, []);
+    }, [firestore]);
 
     useEffect(() => {
-        const ratingsQuery = query(collection(db, "ratings"));
+        const ratingsQuery = query(collection(firestore, "ratings"));
 
         const unsubscribe = onSnapshot(
             ratingsQuery,
@@ -78,7 +78,7 @@ export function useRealTimeProducts() {
         );
 
         return () => unsubscribe();
-    }, []);
+    }, [firestore]);
 
     const products = useMemo(
         () =>

@@ -2,6 +2,7 @@ import SellerLayout from "@/components/SellerLayout";
 import { useMemo, useState } from "react";
 import { useRealTimeUsers } from "@/hooks/useRealTimeUsers";
 import { useRealTimeTransactions } from "@/hooks/useRealTimeTransactions";
+import { sellerDb } from "@/lib/firebaseSeller";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -24,8 +25,8 @@ import { Users, Mail, Phone, MapPin, Eye } from "lucide-react";
 import type { Transaction } from "@/data/types";
 
 const SellerUsers = () => {
-    const { users, loading: usersLoading } = useRealTimeUsers();
-    const { transactions, loading: txLoading } = useRealTimeTransactions();
+    const { users, loading: usersLoading } = useRealTimeUsers(sellerDb);
+    const { transactions, loading: txLoading } = useRealTimeTransactions(sellerDb);
     const [selectedUser, setSelectedUser] = useState<any | null>(null);
 
     const registeredUsers = useMemo(() => {
@@ -179,16 +180,16 @@ const SellerUsers = () => {
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="font-mono text-sm font-bold">#{order.id.slice(0, 8).toUpperCase()}</span>
                                                     <Badge className={`capitalize ${order.status === "pending"
-                                                            ? "bg-yellow-100 text-yellow-700"
-                                                            : order.status === "processing"
-                                                                ? "bg-blue-100 text-blue-700"
-                                                                : order.status === "shipped"
-                                                                    ? "bg-orange-100 text-orange-700"
-                                                                    : order.status === "delivered"
-                                                                        ? "bg-green-100 text-green-700"
-                                                                        : order.status === "completed"
-                                                                            ? "bg-emerald-100 text-emerald-700"
-                                                                            : "bg-red-100 text-red-700"
+                                                        ? "bg-yellow-100 text-yellow-700"
+                                                        : order.status === "processing"
+                                                            ? "bg-blue-100 text-blue-700"
+                                                            : order.status === "shipped"
+                                                                ? "bg-orange-100 text-orange-700"
+                                                                : order.status === "delivered"
+                                                                    ? "bg-green-100 text-green-700"
+                                                                    : order.status === "completed"
+                                                                        ? "bg-emerald-100 text-emerald-700"
+                                                                        : "bg-red-100 text-red-700"
                                                         }`}>
                                                         {order.status}
                                                     </Badge>

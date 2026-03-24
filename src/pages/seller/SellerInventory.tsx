@@ -14,13 +14,13 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { db } from "@/lib/firebase";
+import { sellerDb } from "@/lib/firebaseSeller";
 import { setDoc, updateDoc, deleteDoc, doc, collection, getDocs } from "firebase/firestore";
 import { useRealTimeProducts } from "@/hooks/useRealTimeProducts";
 import { ProductUpdatedToast } from "@/components/ProductUpdatedToast";
 
 const SellerInventory = () => {
-  const { products: firestoreProducts, loading: productsLoading } = useRealTimeProducts();
+  const { products: firestoreProducts, loading: productsLoading } = useRealTimeProducts(sellerDb);
   const [items, setItems] = useState<Product[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -42,7 +42,7 @@ const SellerInventory = () => {
         // Seed Firestore with default products only once if empty
         const batchSeed = async () => {
           const promises = defaultProducts.map(product =>
-            setDoc(doc(db, "products", product.id), product)
+            setDoc(doc(sellerDb, "products", product.id), product)
           );
           await Promise.all(promises);
         };
@@ -145,10 +145,10 @@ const SellerInventory = () => {
     // Persist to Firestore (Background)
     try {
       if (editing) {
-        await updateDoc(doc(db, "products", productData.id), { ...productData });
+        await updateDoc(doc(sellerDb, "products", productData.id), { ...productData });
         toast.custom(() => <ProductUpdatedToast type="update" />, { duration: 1500 });
       } else {
-        await setDoc(doc(db, "products", productData.id), productData);
+        await setDoc(doc(sellerDb, "products", productData.id), productData);
         toast.custom(() => <ProductUpdatedToast type="add" />, { duration: 1500 });
       }
     } catch (error) {
@@ -163,7 +163,7 @@ const SellerInventory = () => {
     setItems(prev => prev.filter(i => i.id !== id));
 
     try {
-      await deleteDoc(doc(db, "products", id));
+      await deleteDoc(doc(sellerDb, "products", id));
       toast.custom(() => <ProductUpdatedToast type="delete" />, { duration: 1500 });
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -377,8 +377,8 @@ const SellerInventory = () => {
                   <td className="p-4 align-middle text-right">
                     <span
                       className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${(p.stock || 0) < 10
-                          ? "bg-red-50 text-red-700 ring-red-600/10"
-                          : "bg-green-50 text-green-700 ring-green-600/20"
+                        ? "bg-red-50 text-red-700 ring-red-600/10"
+                        : "bg-green-50 text-green-700 ring-green-600/20"
                         }`}
                     >
                       {p.stock || 0} units

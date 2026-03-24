@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, query } from "firebase/firestore";
+import { collection, onSnapshot, query, type Firestore } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import type { User } from "@/data/types";
 
 const USERS_CACHE_KEY = "seller_users_cache_v1";
 
-export function useRealTimeUsers() {
+export function useRealTimeUsers(firestore: Firestore = db) {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -23,7 +23,7 @@ export function useRealTimeUsers() {
             // Ignore cache parse errors and continue with live snapshot
         }
 
-        const q = query(collection(db, "users"));
+        const q = query(collection(firestore, "users"));
 
         const unsubscribe = onSnapshot(
             q,
@@ -48,7 +48,7 @@ export function useRealTimeUsers() {
         );
 
         return () => unsubscribe();
-    }, []);
+    }, [firestore]);
 
     return { users, loading };
 }

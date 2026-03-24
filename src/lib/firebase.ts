@@ -5,7 +5,7 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
-const firebaseConfig = {
+export const firebaseConfig = {
     apiKey: "AIzaSyAGSqUWqK5RoQmbSonbWwWSAIf0uHA8G5U",
     authDomain: "ecocoin-market.firebaseapp.com",
     projectId: "ecocoin-market",

@@ -3,6 +3,7 @@ import SellerLayout from "@/components/SellerLayout";
 import { useRealTimeTransactions } from "@/hooks/useRealTimeTransactions";
 import { useRealTimeUsers } from "@/hooks/useRealTimeUsers";
 import { useRealTimeProducts } from "@/hooks/useRealTimeProducts";
+import { sellerDb } from "@/lib/firebaseSeller";
 import {
   DollarSign,
   CalendarDays,
@@ -18,9 +19,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 const SellerReports = () => {
-  const { transactions, loading: txLoading } = useRealTimeTransactions();
-  const { users, loading: usersLoading } = useRealTimeUsers();
-  const { products, loading: productsLoading } = useRealTimeProducts();
+  const { transactions, loading: txLoading } = useRealTimeTransactions(sellerDb);
+  const { users, loading: usersLoading } = useRealTimeUsers(sellerDb);
+  const { products, loading: productsLoading } = useRealTimeProducts(sellerDb);
 
   const [newOrderNotification, setNewOrderNotification] = useState<string | null>(null);
 

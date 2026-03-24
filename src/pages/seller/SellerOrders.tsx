@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import SellerLayout from "@/components/SellerLayout";
 import { useRealTimeTransactions } from "@/hooks/useRealTimeTransactions";
 import { useRealTimeUsers } from "@/hooks/useRealTimeUsers";
@@ -20,9 +20,8 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
-import { db } from "@/lib/firebase";
+import { sellerAuth, sellerDb } from "@/lib/firebaseSeller";
 import { doc, getDoc, updateDoc, writeBatch } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
 import {
     CalendarDays,
     CreditCard,
@@ -65,10 +64,12 @@ const ALLOWED_TRANSITIONS: Record<Transaction["status"], Transaction["status"][]
 };
 
 const SellerOrders = () => {
-    const { transactions, loading } = useRealTimeTransactions();
-    const { users } = useRealTimeUsers();
+    const { transactions, loading } = useRealTimeTransactions(sellerDb);
+    const { users } = useRealTimeUsers(sellerDb);
     const [filter, setFilter] = useState<Transaction["status"] | "all">("all");
     const [selectedOrder, setSelectedOrder] = useState<Transaction | null>(null);
+    const hasInitializedLiveFeedRef = useRef(false);
+    const knownOrderIdsRef = useRef<Set<string>>(new Set());
 
     const filteredOrders = useMemo(() => {
         return filter === "all" ? transactions : transactions.filter((tx) => tx.status === filter);
@@ -86,15 +87,46 @@ const SellerOrders = () => {
         }
     };
 
+    useEffect(() => {
+        if (loading) return;
+
+        const currentIds = new Set(transactions.map((tx) => tx.id));
+
+        if (!hasInitializedLiveFeedRef.current) {
+            hasInitializedLiveFeedRef.current = true;
+            knownOrderIdsRef.current = currentIds;
+            return;
+        }
+
+        const newOrders = transactions.filter((tx) => !knownOrderIdsRef.current.has(tx.id));
+
+        if (newOrders.length > 0) {
+            const latest = [...newOrders].sort(
+                (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            )[0];
+
+            toast.success(
+                newOrders.length === 1 ? "New order received" : `${newOrders.length} new orders received`,
+                {
+                    description: latest
+                        ? `Latest: #${latest.id.slice(0, 8).toUpperCase()} • ₱${(latest.total || 0).toLocaleString()}`
+                        : undefined,
+                }
+            );
+        }
+
+        knownOrderIdsRef.current = currentIds;
+    }, [transactions, loading]);
+
     const restoreInventoryForOrder = async (order: Transaction) => {
-        const batch = writeBatch(db);
+        const batch = writeBatch(sellerDb);
 
         for (const item of order.items || []) {
             const productId = item.product?.id;
             const quantity = item.quantity || 0;
             if (!productId || quantity <= 0) continue;
 
-            const productRef = doc(db, "products", productId);
+            const productRef = doc(sellerDb, "products", productId);
             const productSnap = await getDoc(productRef);
             if (!productSnap.exists()) continue;
 
@@ -113,8 +145,7 @@ const SellerOrders = () => {
 
     const updateOrderStatus = async (order: Transaction, nextStatus: Transaction["status"]) => {
         try {
-            const auth = getAuth();
-            if (!auth.currentUser) {
+            if (!sellerAuth.currentUser) {
                 toast.error("Seller is not authenticated in Firebase. Please sign in with Firebase account.");
                 return;
             }
@@ -125,7 +156,7 @@ const SellerOrders = () => {
                 return;
             }
 
-            const orderRef = doc(db, "transactions", order.id);
+            const orderRef = doc(sellerDb, "transactions", order.id);
             const nextHistory = [
                 ...(order.statusHistory || []),
                 { status: nextStatus, at: new Date().toISOString() },

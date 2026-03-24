@@ -13,11 +13,11 @@ import {
   getDoc,
   updateDoc,
   collection,
-  addDoc,
   query,
   where,
   getDocs,
-  serverTimestamp
+  serverTimestamp,
+  runTransaction
 } from "firebase/firestore";
 
 interface AuthContextType {
@@ -27,7 +27,11 @@ interface AuthContextType {
   register: (data: Omit<User, "id" | "role"> & { password: string }) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateUserProfile: (data: Partial<User>) => Promise<{ success: boolean; error?: string }>;
-  addTransaction: (items: CartItem[], paymentMethod: string, deliveryMethod: string) => Promise<void>;
+  addTransaction: (
+    items: CartItem[],
+    paymentMethod: string,
+    deliveryMethod: string
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -158,52 +162,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const addTransaction = async (items: CartItem[], paymentMethod: string, deliveryMethod: string) => {
-    if (!user) return;
+    if (!user) return { success: false, error: "No user logged in" };
 
     try {
       const total = items.reduce((s, i) => s + i.product.price * i.quantity, 0);
+      const txRef = doc(collection(db, "transactions"));
+      const createdAtIso = new Date().toISOString();
       const txData = {
         userId: user.id,
-        date: new Date().toISOString(),
+        date: createdAtIso,
         items,
         total,
         paymentMethod,
         deliveryMethod,
         status: "pending",
-        statusHistory: [{ status: "pending", at: new Date().toISOString() }],
+        statusHistory: [{ status: "pending", at: createdAtIso }],
         createdAt: serverTimestamp()
       };
 
-      const docRef = await addDoc(collection(db, "transactions"), txData);
+      await runTransaction(db, async (transaction) => {
+        const productUpdates: Array<{ ref: ReturnType<typeof doc>; stock: number; sold: number }> = [];
 
-      // **UPDATE PRODUCT STOCK & SOLD COUNT** - Reduce stock and increment sold for each item purchased
-      for (const cartItem of items) {
-        const productRef = doc(db, "products", cartItem.product.id);
-        const productDoc = await getDoc(productRef);
+        for (const cartItem of items) {
+          const productRef = doc(db, "products", cartItem.product.id);
+          const productSnap = await transaction.get(productRef);
 
-        if (productDoc.exists()) {
-          const currentStock = productDoc.data().stock || 0;
-          const currentSold = productDoc.data().sold || 0;
-          const newStock = Math.max(0, currentStock - cartItem.quantity);
-          const newSold = currentSold + cartItem.quantity;
+          if (!productSnap.exists()) {
+            throw new Error(`Product not found: ${cartItem.product.name}`);
+          }
 
-          await updateDoc(productRef, {
-            stock: newStock,
-            sold: newSold
+          const currentStock = Number(productSnap.data().stock || 0);
+          const currentSold = Number(productSnap.data().sold || 0);
+
+          if (currentStock < cartItem.quantity) {
+            throw new Error(`Insufficient stock for ${cartItem.product.name}`);
+          }
+
+          productUpdates.push({
+            ref: productRef,
+            stock: currentStock - cartItem.quantity,
+            sold: currentSold + cartItem.quantity,
           });
-
-          console.log(`Updated ${cartItem.product.name}: stock ${currentStock} → ${newStock}, sold ${currentSold} → ${newSold}`);
         }
-      }
+
+        productUpdates.forEach((update) => {
+          transaction.update(update.ref, {
+            stock: update.stock,
+            sold: update.sold,
+          });
+        });
+
+        transaction.set(txRef, txData);
+      });
 
       const newTx: Transaction = {
-        id: docRef.id,
+        id: txRef.id,
         ...txData
       } as Transaction;
 
       setTransactions(prev => [...prev, newTx]);
+      return { success: true };
     } catch (error) {
       console.error("Failed to add transaction:", error);
+      return { success: false, error: getFirebaseErrorMessage(error) };
     }
   };
 

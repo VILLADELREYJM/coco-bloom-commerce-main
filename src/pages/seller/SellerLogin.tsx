@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Mail, Lock, Store } from "lucide-react";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { sellerAuth, sellerDb } from "@/lib/firebaseSeller";
 
 const SELLER_EMAIL = "justinegaming017@gmail.com";
 const SELLER_PASS = "jusjus";
@@ -15,13 +18,73 @@ const SellerLogin = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (email === SELLER_EMAIL && password === SELLER_PASS) {
-      localStorage.setItem("coircraft_seller", "true");
-      toast.success("Welcome back, Seller!");
-      navigate("/seller/reports");
+      try {
+        let credential;
+
+        try {
+          credential = await signInWithEmailAndPassword(sellerAuth, email, password);
+        } catch (signInError) {
+          const code =
+            typeof signInError === "object" && signInError && "code" in signInError
+              ? String((signInError as { code?: string }).code)
+              : "";
+
+          if (code === "auth/user-not-found" || code === "auth/invalid-credential") {
+            credential = await createUserWithEmailAndPassword(sellerAuth, email, password);
+          } else {
+            throw signInError;
+          }
+        }
+
+        const sellerUid = credential.user.uid;
+        const userRef = doc(sellerDb, "users", sellerUid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            email,
+            name: "Seller",
+            address: "",
+            mobile: "",
+            role: "seller",
+          });
+        } else if (userSnap.data().role !== "seller") {
+          await setDoc(
+            userRef,
+            {
+              role: "seller",
+              email: userSnap.data().email || email,
+            },
+            { merge: true }
+          );
+        }
+
+        localStorage.setItem("coircraft_seller", "true");
+        toast.success("Welcome back, Seller!");
+        navigate("/seller/reports");
+      } catch (error) {
+        console.error("Seller Firebase sign-in failed:", error);
+        const code =
+          typeof error === "object" && error && "code" in error
+            ? String((error as { code?: string }).code)
+            : "";
+
+        if (code === "auth/operation-not-allowed") {
+          toast.error("Enable Email/Password sign-in in Firebase Authentication.");
+          return;
+        }
+
+        if (code === "auth/email-already-in-use") {
+          toast.error("Seller account exists with a different password in Firebase.");
+          return;
+        }
+
+        toast.error(code ? `Seller login failed: ${code}` : "Seller sign-in failed in Firebase.");
+      }
     } else {
       toast.error("Invalid seller credentials.");
     }

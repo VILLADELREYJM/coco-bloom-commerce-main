@@ -45,13 +45,18 @@ const Checkout = () => {
     return null;
   }
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!user) {
       toast.error("Please login to complete your purchase");
       navigate("/login");
       return;
     }
-    addTransaction(checkoutItems, payment, delivery);
+
+    const result = await addTransaction(checkoutItems, payment, delivery);
+    if (!result.success) {
+      toast.error(result.error || "Failed to place order. Please try again.");
+      return;
+    }
 
     checkoutItems.forEach((checkoutItem) => {
       const existingCartItem = items.find(
@@ -125,16 +130,16 @@ const Checkout = () => {
                   <div
                     key={label}
                     className={`rounded-xl border px-3 py-3 text-center transition-colors ${active
-                        ? "border-primary bg-primary/10"
-                        : done
-                          ? "border-primary/40 bg-primary/5"
-                          : "border-border bg-muted/30"
+                      ? "border-primary bg-primary/10"
+                      : done
+                        ? "border-primary/40 bg-primary/5"
+                        : "border-border bg-muted/30"
                       }`}
                   >
                     <div
                       className={`mx-auto mb-2 flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${active || done
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
                         }`}
                     >
                       {current}
@@ -232,8 +237,8 @@ const Checkout = () => {
                       <label
                         key={opt.value}
                         className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${delivery === opt.value
-                            ? "border-primary bg-primary/5"
-                            : "hover:bg-muted/40"
+                          ? "border-primary bg-primary/5"
+                          : "hover:bg-muted/40"
                           }`}
                       >
                         <input
@@ -263,8 +268,8 @@ const Checkout = () => {
                       <label
                         key={opt.value}
                         className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${payment === opt.value
-                            ? "border-primary bg-primary/5"
-                            : "hover:bg-muted/40"
+                          ? "border-primary bg-primary/5"
+                          : "hover:bg-muted/40"
                           }`}
                       >
                         <input

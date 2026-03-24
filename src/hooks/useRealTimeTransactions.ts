@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, type Firestore } from "firebase/firestore";
 import type { Transaction } from "@/data/types";
 import { normalizeImageSrc } from "@/lib/image";
 
 const TRANSACTIONS_CACHE_KEY = "seller_transactions_cache_v1";
 
-export function useRealTimeTransactions() {
+export function useRealTimeTransactions(firestore: Firestore = db) {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -25,7 +25,7 @@ export function useRealTimeTransactions() {
         }
 
         // Listen to all transactions in real-time
-        const q = query(collection(db, "transactions"));
+        const q = query(collection(firestore, "transactions"));
 
         const unsubscribe = onSnapshot(
             q,
@@ -62,13 +62,18 @@ export function useRealTimeTransactions() {
             },
             (error) => {
                 console.error("Error fetching transactions:", error);
-                // Keep cached transactions as fallback when live Firestore read fails
+                setTransactions([]);
+                try {
+                    localStorage.removeItem(TRANSACTIONS_CACHE_KEY);
+                } catch {
+                    // Ignore storage errors
+                }
                 setLoading(false);
             }
         );
 
         return () => unsubscribe();
-    }, []);
+    }, [firestore]);
 
     return { transactions, loading };
 }
