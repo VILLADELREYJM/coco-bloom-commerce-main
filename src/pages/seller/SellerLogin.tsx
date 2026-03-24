@@ -84,32 +84,6 @@ const SellerLogin = () => {
               >
                 Sign In
               </Button>
-
-              <div className="pt-6 border-t border-slate-100">
-                <div className="space-y-4 text-left">
-                  <p className="text-xs font-bold text-[#4a6b4a] uppercase tracking-widest">
-                    Demo Access
-                  </p>
-                  <div className="space-y-3">
-                    <div>
-                      <span className="block text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-0.5">
-                        Email
-                      </span>
-                      <p className="font-mono text-sm font-semibold text-slate-700 select-all">
-                        {SELLER_EMAIL}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="block text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-0.5">
-                        Password
-                      </span>
-                      <p className="font-mono text-sm font-semibold text-slate-700 select-all">
-                        {SELLER_PASS}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </form>
           </div>
 
